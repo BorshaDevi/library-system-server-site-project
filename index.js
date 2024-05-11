@@ -12,7 +12,7 @@ app.use(express.json())
 
 
 
-console.log(process.env.DB_pass)
+
 
 const uri = `mongodb+srv://${process.env.DB_user}:${process.env.DB_pass}@cluster0.uqcmivv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
