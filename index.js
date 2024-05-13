@@ -1,5 +1,7 @@
 const express = require('express')
 const cors=require('cors')
+const cookieParser = require('cookie-parser')
+const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
@@ -19,7 +21,11 @@ app.use(
 );
 app.use(express.json())
 
-
+// const cookieOptions = {
+//   httpOnly: true,
+//   secure: process.env.NODE_ENV === "production",
+//   sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+// };
 
 
 
@@ -46,7 +52,7 @@ async function run() {
    
    app.get('/allBooks/:email',async(req,res)=>{
     const cursor =  await bookCollection.find().toArray();
-    console.log(cursor)
+    
     res.send(cursor)
    })
 
@@ -54,21 +60,21 @@ async function run() {
     const Id=req.params.id
     const query = { _id: new ObjectId(Id) };
     const result = await bookCollection.findOne(query);
-    console.log(result)
+    
     res.send(result)
   })
 
    app.post('/books',async(req,res)=>{
     const books=req.body;
     const result = await  bookCollection.insertOne(books);
-    console.log(result)
+   
     res.send(result)
    })
    
    app.put('/update/:id',async(req,res)=>{
     const Id=req.params.id
     const user=req.body
-    console.log(user)
+    
     const filter = { _id: new ObjectId(Id) };
     const options = { upsert: true };
     const updateDoc = {
@@ -81,10 +87,17 @@ async function run() {
       },
     };
     const result = await bookCollection.updateOne(filter, updateDoc, options);
-    console.log(result)
+    
     res.send(result)
    })
-
+   
+   app.post('/token',async(req,res)=>{
+       const user=req.body
+       console.log(user)
+       const token=jwt.sign(user, process.env.DB_Token, { expiresIn: '1h' });
+       console.log(token)
+       res.send(token)
+   })
 
 
 
