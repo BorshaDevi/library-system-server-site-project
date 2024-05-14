@@ -7,25 +7,26 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const port =process.env.PORT || 5000
 
+const corsOptions = {
+  origin: [
+    "http://localhost:5173",
+    "https://library-system-project-6ab71.web.app",
+    "https://library-system-project-6ab71.firebaseapp.com",
+  ],
+  credentials: true,
+}
 
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+  
+};
 // middle
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "https://library-system-project-6ab71.web.app",
-      "https://library-system-project-6ab71.firebaseapp.com",
-    ],
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
 app.use(express.json())
-
-// const cookieOptions = {
-//   httpOnly: true,
-//   secure: process.env.NODE_ENV === "production",
-//   sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-// };
+app.use(cookieParser());
 
 
 
@@ -46,11 +47,16 @@ async function run() {
     // await client.connect();
     
     const bookCollection = client.db("addBookDB").collection("books");
+    const categoryCollection = client.db("addBookDB").collection("bookCategories");
        
    
 
-   
-   app.get('/allBooks/:email',async(req,res)=>{
+   app.get('/category',async(req,res)=>{
+        const result=await categoryCollection.find().toArray()
+        console.log(result)
+        res.send(result)
+   })
+   app.get('/allBooks',async(req,res)=>{
     const cursor =  await bookCollection.find().toArray();
     
     res.send(cursor)
@@ -95,9 +101,17 @@ async function run() {
        const user=req.body
        console.log(user)
        const token=jwt.sign(user, process.env.DB_Token, { expiresIn: '1h' });
+      
+      
        console.log(token)
-       res.send(token)
+       res.cookie('token',token,cookieOptions).send('success')
    })
+    app.post('/logout',async(req,res)=>{
+      const user=req.body
+      console.log(user)
+      res.clearCookie('token',{...cookieOptions,maxAge:0}).send('logout')
+
+    })
 
 
 
