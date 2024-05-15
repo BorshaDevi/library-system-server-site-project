@@ -51,7 +51,13 @@ async function run() {
     const borrowCollection = client.db("addBookDB").collection("borrow");
 
     
-   
+   const verify=(req,res,next)=>{
+    const token=req.cookies?.token
+     if(!token){
+      return res.send('token not ok')
+     }
+   }
+
     app.get('/borrowedBook/:email',async(req,res)=>{
       const email=req.params.email
       const query={userEmail:email}
