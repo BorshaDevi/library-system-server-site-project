@@ -49,6 +49,8 @@ async function run() {
     const bookCollection = client.db("addBookDB").collection("books");
     const categoryCollection = client.db("addBookDB").collection("bookCategories");
     const borrowCollection = client.db("addBookDB").collection("borrow");
+
+    
    
     app.get('/borrowedBook/:email',async(req,res)=>{
       const email=req.params.email
@@ -105,13 +107,13 @@ async function run() {
           bookNumber:borrow.bookNumber
         }
         const borrowAlready=await borrowCollection.findOne(query)
-        console.log(borrowAlready)
+        // console.log(borrowAlready)
         if(borrowAlready){
           return res.send('already borrow a book')
         }
         const result=await borrowCollection.insertOne(borrow)
         const updateBookNumber=await bookCollection.updateOne({bookName :(borrow.bookName)},{$inc:{bookNumber:-1}})
-        console.log(updateBookNumber)
+        // console.log(updateBookNumber)
         res.send(result)
 
    })
@@ -139,16 +141,16 @@ async function run() {
    
    app.post('/token',async(req,res)=>{
        const user=req.body
-       console.log(user)
+      //  console.log(user)
        const token=jwt.sign(user, process.env.DB_Token, { expiresIn: '1h' });
       
       
-       console.log(token)
+      //  console.log(token)
        res.cookie('token',token,cookieOptions).send('success')
    })
     app.post('/logout',async(req,res)=>{
       const user=req.body
-      console.log(user)
+      // console.log(user)
       res.clearCookie('token',{...cookieOptions,maxAge:0}).send('logout')
 
     })
