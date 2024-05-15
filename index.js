@@ -49,7 +49,13 @@ async function run() {
     const bookCollection = client.db("addBookDB").collection("books");
     const categoryCollection = client.db("addBookDB").collection("bookCategories");
     const borrowCollection = client.db("addBookDB").collection("borrow");
-
+   
+    app.get('/borrowedBook/:email',async(req,res)=>{
+      const email=req.params.email
+      const query={userEmail:email}
+      const result = await borrowCollection.find(query).toArray();
+      res.send(result)
+    })
 
     app.get('/details/:id',async(req,res)=>{
       const Id=req.params.id
@@ -92,12 +98,24 @@ async function run() {
    
     res.send(result)
    })
-  //  app.post('/borrow',async(req,res)=>{
-  //       const borrow=req.body
-  //       const result = await borrowCollection.updateOne(borrow,{$inc:{bookNumber:-1}});
-  //       console.log(result)
-  //       res.send(result)
-  //  })
+   app.post('/borrow',async(req,res)=>{
+        const borrow=req.body
+        const query={
+          email:borrow.email,
+          bookNumber:borrow.bookNumber
+        }
+        const borrowAlready=await borrowCollection.findOne(query)
+        console.log(borrowAlready)
+        if(borrowAlready){
+          return res.send('already borrow a book')
+        }
+        const result=await borrowCollection.insertOne(borrow)
+        const updateBookNumber=await bookCollection.updateOne({bookName :(borrow.bookName)},{$inc:{bookNumber:-1}})
+        console.log(updateBookNumber)
+        res.send(result)
+
+   })
+   
    
    app.put('/update/:id',async(req,res)=>{
     const Id=req.params.id
@@ -133,6 +151,18 @@ async function run() {
       console.log(user)
       res.clearCookie('token',{...cookieOptions,maxAge:0}).send('logout')
 
+    })
+
+    app.delete('/delete/:bookName',async(req,res)=>{
+      const bookName=req.params.bookName
+      const query={bookName:bookName}
+      const findData=await borrowCollection.findOne(query)
+      if(!findData){
+        return res.send('Book is not found')
+      }
+      const updateBookNumber=await bookCollection.updateOne({bookName:(query.bookName)},{$inc:{bookNumber:1}} )
+      const result = await borrowCollection.deleteOne(query);
+      res.send(result)
     })
 
 
