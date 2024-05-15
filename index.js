@@ -48,12 +48,28 @@ async function run() {
     
     const bookCollection = client.db("addBookDB").collection("books");
     const categoryCollection = client.db("addBookDB").collection("bookCategories");
+    const borrowCollection = client.db("addBookDB").collection("borrow");
+
+
+    app.get('/details/:id',async(req,res)=>{
+      const Id=req.params.id
+      const query = { _id: new ObjectId(Id) };
+      const result = await bookCollection.findOne(query);
+      
+      res.send(result)
+    })
        
-   
+   app.get('/categoryName/:category',async(req,res)=>{
+      const catebook=req.params.category
+      const query = {category : catebook };
+      const result= await bookCollection.find(query).toArray();
+      
+      res.send(result)
+   })
 
    app.get('/category',async(req,res)=>{
         const result=await categoryCollection.find().toArray()
-        console.log(result)
+       
         res.send(result)
    })
    app.get('/allBooks',async(req,res)=>{
@@ -76,6 +92,12 @@ async function run() {
    
     res.send(result)
    })
+  //  app.post('/borrow',async(req,res)=>{
+  //       const borrow=req.body
+  //       const result = await borrowCollection.updateOne(borrow,{$inc:{bookNumber:-1}});
+  //       console.log(result)
+  //       res.send(result)
+  //  })
    
    app.put('/update/:id',async(req,res)=>{
     const Id=req.params.id
