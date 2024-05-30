@@ -10,8 +10,9 @@ const port =process.env.PORT || 5000
 const corsOptions = {
   origin: [
     "http://localhost:5173",
-    "https://library-system-project-6ab71.web.app",
-    "https://library-system-project-6ab71.firebaseapp.com",
+    // "https://library-system-project-6ab71.web.app",
+    // "https://library-system-project-6ab71.firebaseapp.com",
+    "https://fastidious-moonbeam-8043e1.netlify.app"
   ],
   credentials: true,
 }
@@ -24,7 +25,7 @@ const cookieOptions = {
   
 };
 // middle
-app.use(cors(corsOptions));
+app.use(cors(corsOptions ));
 app.use(express.json())
 app.use(cookieParser());
 
@@ -87,7 +88,21 @@ async function run() {
         res.send(result)
    })
    app.get('/allBooks',async(req,res)=>{
-    const cursor =  await bookCollection.find().toArray();
+    const sort=req.query.sort
+    const filter=req.query.filter
+    let option={}
+    let query={}
+    if(sort) {
+      query.bookNumber=sort === 'asc'?1:-1
+    }
+    if(filter) option={category :filter }
+        
+    
+      // query.bookNumber=sort === 'asc'?1:-1
+      // .sort(query)
+      // query={sort : {bookNumber :sort === 'asc'?1:-1}}
+    
+    const cursor =  await bookCollection.find(option).sort(query).toArray();
     
     res.send(cursor)
    })
